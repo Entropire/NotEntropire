@@ -1,5 +1,6 @@
 package me.entropire.commands;
 
+import me.entropire.Invitor;
 import me.entropire.Main;
 import me.entropire.TeamEditor;
 import net.dv8tion.jda.api.entities.User;
@@ -59,7 +60,13 @@ public class TeamCommands extends ListenerAdapter
             case "leave":
                 TeamEditor.leaveTeam(event);
                 break;
-
+            case "invite":
+                User participent = event.getOption("participent").getAsUser();
+                if(participent != event.getUser() && !participent.isBot())
+                {
+                    Invitor.sendDMWithButtons(participent);
+                }
+                break;
             default:
                 event.reply("Unknown subcommand!").setEphemeral(true).queue();
                 break;

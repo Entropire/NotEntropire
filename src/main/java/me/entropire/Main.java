@@ -54,7 +54,9 @@ public class Main
                                                 .addOption(OptionType.USER, "teammate1", "Your first team mate", false)
                                                 .addOption(OptionType.USER, "teammate2", "Your second team mate", false),
                                         new SubcommandData("delete", "Delete your team"),
-                                        new SubcommandData("leave", "Leave your team")
+                                        new SubcommandData("leave", "Leave your team"),
+                                        new SubcommandData("invite", "Invite player to your team")
+                                                .addOption(OptionType.USER, "participent", "Participent you want to invite", true)
                                 )
                 ).queue(
                         success -> System.out.println("Command added successfully!"),
