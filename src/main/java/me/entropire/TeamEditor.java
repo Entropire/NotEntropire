@@ -3,7 +3,6 @@ package me.entropire;
 import me.entropire.objects.Team;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.awt.*;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 
 public class TeamEditor
 {
-    public static void createTeam(SlashCommandInteractionEvent event, String teamName, ArrayList<User> teamMembers)
+    public static void createTeam(SlashCommandInteractionEvent event, String teamName)
     {
         if(Main.userDatabase.hasTeam(event.getUser()))
         {
@@ -33,28 +32,7 @@ public class TeamEditor
             return;
         }
 
-        ArrayList<String> members = new ArrayList<>();
-        members.add(event.getUser().getId());
-
-        if(teamMembers.size() > 0)
-        {
-            for (User user : teamMembers)
-            {
-                if(!Main.userDatabase.userExists(user))
-                {
-                    Main.userDatabase.addUser(user);
-                }
-
-                if(Main.userDatabase.hasTeam(user))
-                {
-                    event.reply(user.getName() + " is already in a team!").setEphemeral(true).queue();
-                    return;
-                }
-                members.add(user.getId());
-            }
-        }
-
-        Team team = new Team(0, teamName, event.getUser().getId(), members);
+        Team team = new Team(0, teamName, event.getUser().getId());
         Main.teamDatabase.addTeam(team);
         team = Main.teamDatabase.getTeamDataByName(teamName);
 
@@ -66,21 +44,11 @@ public class TeamEditor
                 .setPermissions()
                 .complete();
 
-        Role role = event.getGuild().getRolesByName(teamName, true).stream().findFirst().orElse(null);
-
-        teamMembers.add(0, event.getUser());
-        for(User member : teamMembers)
-        {
-            Main.userDatabase.updateUserTeam(member.getId(), team.getId());
-            Main.guild.addRoleToMember(member, role).queue();
-        }
+        //Role role = event.getGuild().getRolesByName(teamName, true).stream().findFirst().orElse(null);
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("New team: " + teamName)
-                .setDescription("You have created a new team!")
-                .addField("Members", event.getUser().getName() +
-                        (teamMembers.size() > 1 ? ", " + teamMembers.get(1).getName() : "") +
-                        (teamMembers.size() > 2 ? ", " + teamMembers.get(2).getName() : "") , false);
+                .setDescription("You have created a new team!");
 
         event.replyEmbeds(embed.build()).setEphemeral(true).queue();
     }

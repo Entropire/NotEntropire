@@ -9,12 +9,11 @@ public class Team
     private String owner;
     private ArrayList<String> members;
 
-    public Team(int id, String name, String owner, ArrayList<String> members)
+    public Team(int id, String name, String owner)
     {
         this.id = id;
         this.name = name;
         this.owner = owner;
-        this.members = members;
     }
 
     public int getId()

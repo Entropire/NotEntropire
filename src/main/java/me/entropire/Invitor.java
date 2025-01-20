@@ -1,39 +1,61 @@
 package me.entropire;
 
+import me.entropire.objects.Invite;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
+
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class Invitor
 {
-    public static void sendDMWithButtons(SlashCommandInteractionEvent event, User user)
+    public static void inviteUserToTeam(SlashCommandInteractionEvent event, User user)
     {
+        if(!Main.userDatabase.hasTeam(event.getUser()))
+        {
+            event.reply("You must be in a team to preform this action!").setEphemeral(true).queue();
+            return;
+        }
+
+        if(Main.userDatabase.hasTeam(user))
+        {
+            event.reply("This user is already part of a team!").setEphemeral(true).queue();
+            return;
+        }
+
+        int teamId = Main.userDatabase.getTeamId(event.getUser());
+
         user.openPrivateChannel().queue(channel -> {
-            channel.sendMessage("Here are some buttons:")
+            channel.sendMessage(event.getUser().getName() + " has invited you to there team!")
                     .setActionRow(
                             Button.primary("Accept", "Accept"),
-                            Button.secondary("Reject", "Reject")
+                            Button.secondary("Decline", "Decline")
                     ).queue(message -> {
-                        // Listen for button interactions
-                        message.getJDA().addEventListener(new ListenerAdapter() {
-                            @Override
-                            public void onButtonInteraction(ButtonInteractionEvent event) {
-                                // Check if the interaction matches the buttons
-                                if (event.getComponentId().equals("Accept") || event.getComponentId().equals("Reject")) {
-                                    // Acknowledge the button click
-                                    event.deferEdit().queue();
 
-                                    // Remove buttons by editing the message to clear action rows
-                                    event.getMessage().editMessage(event.getMessage().getContentRaw()) // Keep the original content
-                                            .setComponents() // Clears all components (removes buttons)
-                                            .queue();
-                                }
-                            }
-                        });
+                        Invite invite = new Invite(event.getUser(), user, teamId, System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5));
+                        Main.invites.put(message.getId(), invite);
+
+                        message.editMessage(event.getUser().getName() + " has invited you to their team! (This invitation has expired)")
+                                .setActionRow()
+                                .queueAfter(5, TimeUnit.MINUTES);
                     });
         });
             event.reply("Invitation send to " + user.getName()).setEphemeral(true).queue();
+    }
+
+    public void Accept(SlashCommandInteractionEvent event)
+    {
+        if(Main.userDatabase.hasTeam(event.getUser()))
+        {
+            event.reply("You are already in a team!").setEphemeral(true).queue();
+            return;
+        }
+
+        if(Main.invites.containsKey(event.))
+        {
+
+        }
     }
 }

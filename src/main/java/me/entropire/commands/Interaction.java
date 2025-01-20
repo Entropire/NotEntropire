@@ -1,5 +1,6 @@
 package me.entropire.commands;
 
+import me.entropire.Main;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -7,21 +8,29 @@ public class Interaction extends ListenerAdapter
 {
     @Override
     public void onButtonInteraction(ButtonInteractionEvent event) {
-        String buttonId = event.getComponentId(); // Get the ID of the clicked button
+        String buttonId = event.getComponentId();
+        if (!event.getComponentId().equals("Accept") && !event.getComponentId().equals("Decline"))
+        {
+            return;
+        }
+
+        event.getMessage().editMessage(event.getMessage().getContentRaw() + (buttonId == "Accept" ? " (accepted)" : " (declined)"))
+                .setComponents()
+                .queue();
+
+        event.deferEdit().queue();
 
         switch (buttonId) {
-            case "button_1":
-                event.reply("You clicked Button 1!").queue();
-                // Add the code you want to execute for Button 1 here
+            case "Accept":
+
                 break;
 
-            case "button_2":
-                event.reply("You clicked Button 2!").queue();
-                // Add the code you want to execute for Button 2 here
+            case "Decline":
+                Main.invites.remove(event.getUser());
                 break;
-
-            default:
-                event.reply("Unknown button clicked!").queue();
         }
+
+
+
     }
 }

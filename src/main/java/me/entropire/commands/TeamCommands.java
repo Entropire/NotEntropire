@@ -30,27 +30,7 @@ public class TeamCommands extends ListenerAdapter
         switch (subcommand) {
             case "create":
                 String teamName = event.getOption("name") != null ? event.getOption("name").getAsString() : "Unnamed Team";
-
-                ArrayList<User> teamMates = new ArrayList<>();
-                if(event.getOption("teammate1") != null)
-                {
-                    User teammate1 = event.getOption("teammate1").getAsUser();
-                    if(teammate1 != event.getUser() && !teammate1.isBot())
-                    {
-                        teamMates.add(teammate1);
-                    }
-                }
-
-                if(event.getOption("teammate2") != null )
-                {
-                    User teammate2 = event.getOption("teammate2").getAsUser();
-                    if(teammate2 != event.getUser() && !teammate2.isBot())
-                    {
-                        teamMates.add(teammate2);
-                    }
-                }
-
-                TeamEditor.createTeam(event, teamName, teamMates);
+                TeamEditor.createTeam(event, teamName);
                 break;
 
             case "delete":
@@ -64,7 +44,7 @@ public class TeamCommands extends ListenerAdapter
                 User participent = event.getOption("participent").getAsUser();
                 if(participent != event.getUser() && !participent.isBot())
                 {
-                    Invitor.sendDMWithButtons(event, participent);
+                    Invitor.inviteUserToTeam(event, participent);
                 }
                 break;
             default:
