@@ -1,5 +1,6 @@
 package me.entropire;
 
+import me.entropire.commands.Interaction;
 import me.entropire.commands.TeamCommands;
 import me.entropire.database.DataBaseContext;
 import me.entropire.database.TeamDatabase;
@@ -37,6 +38,7 @@ public class Main
 
             jda = JDABuilder.createDefault("MTMxNjA0ODc3NDU5ODEwMzA5MA.G57cUE.DLSTCNR4VvsM8JGRAVHC4L6PYsz-ymSYTzgUHU")
                     .addEventListeners(new TeamCommands())
+                    .addEventListeners(new Interaction())
                     .build();
 
             jda.awaitReady();

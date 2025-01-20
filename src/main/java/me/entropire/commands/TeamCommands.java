@@ -64,7 +64,7 @@ public class TeamCommands extends ListenerAdapter
                 User participent = event.getOption("participent").getAsUser();
                 if(participent != event.getUser() && !participent.isBot())
                 {
-                    Invitor.sendDMWithButtons(participent);
+                    Invitor.sendDMWithButtons(event, participent);
                 }
                 break;
             default:
