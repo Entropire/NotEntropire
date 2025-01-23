@@ -9,7 +9,6 @@ import me.entropire.objects.Invite;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
@@ -49,7 +48,7 @@ public class Main
             teamDatabase = new TeamDatabase(dataBaseContext);
             userDatabase = new UserDatabase(dataBaseContext);
 
-            jda = JDABuilder.createDefault("")
+            jda = JDABuilder.createDefault("Token")
                     .addEventListeners(new TeamCommands())
                     .addEventListeners(new Interaction())
                     .build();
@@ -79,7 +78,6 @@ public class Main
                             failure.printStackTrace();
                         }
                 );
-
             }
             else
             {

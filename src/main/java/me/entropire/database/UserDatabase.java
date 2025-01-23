@@ -20,7 +20,7 @@ public class UserDatabase
             CREATE TABLE IF NOT EXISTS Users (
                 id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
-                teamId INTEGER NOT NULL DEFAULT 0
+                teamName STRING DEFAULT NULL
             )
             """);
         }
@@ -59,17 +59,16 @@ public class UserDatabase
         return false;
     }
 
-    public int getTeamId(User user)
+    public String getTeamName(User user)
     {
-        int teamId = -1;
-        try (PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("SELECT teamId FROM Users WHERE id = ?"))
+        try (PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("SELECT teamName FROM Users WHERE id = ?"))
         {
             preparedStatement.setString(1, user.getId());
             try (ResultSet resultSet = preparedStatement.executeQuery())
             {
                 if (resultSet.next())
                 {
-                    teamId = resultSet.getInt("teamId");
+                   return resultSet.getString("teamName");
                 }
             }
         }
@@ -77,14 +76,14 @@ public class UserDatabase
         {
             System.out.println( "Failed to get teamId out of users table: " + e.getMessage());
         }
-        return teamId;
+        return null;
     }
 
-    public void updateUserTeam(String userId, int teamId)
+    public void updateUserTeam(String userId, String teamName)
     {
-        try(PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("UPDATE Users SET teamId = ? WHERE id = ?"))
+        try(PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("UPDATE Users SET teamName = ? WHERE id = ?"))
         {
-            preparedStatement.setString(1, String.valueOf(teamId));
+            preparedStatement.setString(1, teamName);
             preparedStatement.setString(2, userId);
             preparedStatement.executeUpdate();
         }
@@ -94,21 +93,31 @@ public class UserDatabase
         }
     }
 
+    public void updateUserTeamWithUserName(String userName, String teamName)
+    {
+        try(PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("UPDATE Users SET teamName = ? WHERE name = ?"))
+        {
+            preparedStatement.setString(1, teamName);
+            preparedStatement.setString(2, userName);
+            preparedStatement.executeUpdate();
+        }
+        catch (Exception e)
+        {
+            System.out.println("Failed to update teamId in users table with userName: " + e.getMessage());
+        }
+    }
+
     public boolean hasTeam(User user)
     {
-        boolean hasTeam = false;
-        try (PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("SELECT teamId FROM Users WHERE id = ?"))
+        try (PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("SELECT teamName FROM Users WHERE id = ?"))
         {
             preparedStatement.setString(1, user.getId());
             try (ResultSet resultSet = preparedStatement.executeQuery())
             {
                 if (resultSet.next())
                 {
-                    int teamId = resultSet.getInt("teamId");
-                    if (teamId > 0)
-                    {
-                        hasTeam = true;
-                    }
+                    String teamName = resultSet.getString("teamName");
+                    return teamName != null;
                 }
             }
         }
@@ -116,6 +125,6 @@ public class UserDatabase
         {
             System.out.println("Failed check if players has a team in users table: " + e.getMessage());
         }
-        return hasTeam;
+        return false;
     }
 }

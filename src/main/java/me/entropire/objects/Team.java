@@ -4,26 +4,27 @@ import java.util.ArrayList;
 
 public class Team
 {
-    private int id;
     private String name;
+    private String roleId;
     private String owner;
     private ArrayList<String> members;
 
-    public Team(int id, String name, String owner)
+    public Team(String name, String roleId, String owner, ArrayList<String> members)
     {
-        this.id = id;
         this.name = name;
+        this.roleId = roleId;
         this.owner = owner;
-    }
-
-    public int getId()
-    {
-        return id;
+        this.members = members;
     }
 
     public String getName()
     {
         return name;
+    }
+
+    public String getRoleId()
+    {
+        return roleId;
     }
 
     public String getOwner()

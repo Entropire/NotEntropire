@@ -27,24 +27,24 @@ public class TeamCommands extends ListenerAdapter
             return;
         }
 
+        System.out.println("Command executed: " + event.getUser().getName() + " : " + event.getSubcommandName());
+
         switch (subcommand) {
             case "create":
                 String teamName = event.getOption("name") != null ? event.getOption("name").getAsString() : "Unnamed Team";
                 TeamEditor.createTeam(event, teamName);
                 break;
-
             case "delete":
                 TeamEditor.deleteTeam(event);
                 break;
-
             case "leave":
                 TeamEditor.leaveTeam(event);
                 break;
             case "invite":
-                User participent = event.getOption("participent").getAsUser();
-                if(participent != event.getUser() && !participent.isBot())
+                User invitedUser = event.getOption("participent").getAsUser();
+                if(invitedUser != event.getUser() && !invitedUser.isBot())
                 {
-                    Invitor.inviteUserToTeam(event, participent);
+                    Invitor.inviteUserToTeam(event, invitedUser);
                 }
                 break;
             default:

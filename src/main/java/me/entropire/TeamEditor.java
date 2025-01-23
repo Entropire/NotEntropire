@@ -28,15 +28,11 @@ public class TeamEditor
 
         if(Main.teamDatabase.teamExistsByName(teamName))
         {
-            event.reply("The name " + teamName + " is already in use by another faction!").setEphemeral(true).queue();
+            event.reply("The name " + teamName + " is already in use by another team!").setEphemeral(true).queue();
             return;
         }
 
-        Team team = new Team(0, teamName, event.getUser().getId());
-        Main.teamDatabase.addTeam(team);
-        team = Main.teamDatabase.getTeamDataByName(teamName);
-
-        Main.guild.createRole()
+        Role role = Main.guild.createRole()
                 .setName(teamName)
                 .setColor(Color.GRAY)
                 .setMentionable(false)
@@ -44,12 +40,20 @@ public class TeamEditor
                 .setPermissions()
                 .complete();
 
-        //Role role = event.getGuild().getRolesByName(teamName, true).stream().findFirst().orElse(null);
+        ArrayList<String> members = new ArrayList<>();
+        members.add(event.getUser().getName());
+        Team team = new Team(teamName, role.getId(), event.getUser().getId(), members);
+
+        Main.teamDatabase.addTeam(team);
+        Main.userDatabase.updateUserTeam(event.getUser().getId(), teamName);
+
+        Main.guild.addRoleToMember(event.getUser(), role).queue();
 
         EmbedBuilder embed = new EmbedBuilder()
                 .setTitle("New team: " + teamName)
                 .setDescription("You have created a new team!");
 
+        System.out.println("New team created with the name: " + teamName + ", Owner: " + event.getUser().getName());
         event.replyEmbeds(embed.build()).setEphemeral(true).queue();
     }
 
@@ -61,8 +65,8 @@ public class TeamEditor
             return;
         }
 
-        int teamId = Main.userDatabase.getTeamId(event.getUser());
-        Team team = Main.teamDatabase.getTeamDataById(teamId);
+        String teamName = Main.userDatabase.getTeamName(event.getUser());
+        Team team = Main.teamDatabase.getTeamDataByName(teamName);
 
         if(team == null)
         {
@@ -79,11 +83,11 @@ public class TeamEditor
         ArrayList<String> members = team.getMembers();
         for (String member : members)
         {
-            Main.userDatabase.updateUserTeam(member, 0);
+            Main.userDatabase.updateUserTeamWithUserName(member, null);
         }
-        Main.teamDatabase.deleteTeam(teamId);
+        Main.teamDatabase.deleteTeam(teamName);
 
-        Role role = event.getGuild().getRolesByName(team.getName(), true).stream().findFirst().orElse(null);
+        Role role = Main.guild.getRoleById(team.getRoleId());
         if(role != null)
         {
             role.delete().queue();
@@ -100,19 +104,23 @@ public class TeamEditor
             return;
         }
 
-        int teamId = Main.userDatabase.getTeamId(event.getUser());
-        Team team = Main.teamDatabase.getTeamDataById(teamId);
+        String teamName = Main.userDatabase.getTeamName(event.getUser());
+        Team team = Main.teamDatabase.getTeamDataByName(teamName);
+
         if(team.getOwner().equals(event.getUser().getId()))
         {
             event.reply("You can not preform this action as owner of the team!").setEphemeral(true).queue();
             return;
         }
 
-        Main.teamDatabase.updateFactionMembers(teamId, event.getUser().getId(), false);
-        Main.userDatabase.updateUserTeam(event.getId(), 0);
+        Main.teamDatabase.updateTeamMembers(teamName, event.getUser().getId(), false);
+        Main.userDatabase.updateUserTeam(event.getId(), null);
 
-        Role role = event.getGuild().getRolesByName(team.getName(), true).stream().findFirst().orElse(null);
-        Main.guild.removeRoleFromMember(event.getUser(), role);
+        Role role = event.getGuild().getRoleById(team.getRoleId());
+        if(role != null)
+        {
+            Main.guild.removeRoleFromMember(event.getUser(), role).queue();
+        }
 
         event.reply("You have left your team").setEphemeral(true).queue();
     }

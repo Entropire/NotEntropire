@@ -20,8 +20,8 @@ public class TeamDatabase
         {
             statement.execute("""
                 CREATE TABLE IF NOT EXISTS Teams (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT NOT NULL,
+                    name TEXT PRIMARY KEY NOT NULL,
+                    roleId TEXT NOT NULL,
                     owner TEXT NOT NULL,
                     members TEXT NOT NULL
                 )
@@ -35,11 +35,12 @@ public class TeamDatabase
 
     public void addTeam(Team team)
     {
-        try (PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("INSERT INTO Teams (name, owner, members) VALUES (?, ?, ?)"))
+        try (PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("INSERT INTO Teams (name, roleId, owner, members) VALUES (?, ?, ?, ?)"))
         {
             preparedStatement.setString(1, team.getName());
-            preparedStatement.setString(2, team.getOwner());
-            preparedStatement.setString(3, String.join(",", team.getMembers()));
+            preparedStatement.setString(2, team.getRoleId());
+            preparedStatement.setString(3, team.getOwner());
+            preparedStatement.setString(4, String.join(",", team.getMembers()));
             preparedStatement.execute();
         }
         catch (Exception e)
@@ -63,32 +64,6 @@ public class TeamDatabase
         }
     }
 
-    public Team getTeamDataById(int teamId)
-    {
-        try(PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("SELECT * FROM Teams WHERE id = ?"))
-        {
-            preparedStatement.setString(1, String.valueOf(teamId));
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next())
-            {
-                int id = resultSet.getInt("id");
-                String name = resultSet.getString("name");
-                String owner = resultSet.getString("owner");
-
-                String membersString = resultSet.getString("members");
-                ArrayList<String> membersList = new ArrayList<>(Arrays.asList(membersString.split(",")));
-
-                return new Team(id, name, owner, membersList);
-            }
-        }
-        catch (Exception e)
-        {
-            System.out.println("Failed to get faction data out factions table with faction id: " + e.getMessage());
-        }
-        return null;
-    }
-
     public Team getTeamDataByName(String teamName)
     {
         try(PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("SELECT * FROM Teams WHERE name = ?"))
@@ -98,14 +73,14 @@ public class TeamDatabase
 
             if (resultSet.next())
             {
-                int id = resultSet.getInt("id");
                 String name = resultSet.getString("name");
+                String roleId = resultSet.getString("roleId");
                 String owner = resultSet.getString("owner");
 
                 String membersString = resultSet.getString("members");
                 ArrayList<String> membersList = new ArrayList<>(Arrays.asList(membersString.split(",")));
 
-                return new Team(id, name, owner, membersList);
+                return new Team(name, roleId, owner, membersList);
             }
         }
         catch (Exception e)
@@ -115,12 +90,12 @@ public class TeamDatabase
         return null;
     }
 
-    public void updateFactionMembers(int teamId, String member, Boolean add)
+    public void updateTeamMembers(String teamName, String member, Boolean add)
     {
         ArrayList<String> membersList;
-        try(PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("SELECT members FROM Teams WHERE id = ?"))
+        try(PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("SELECT members FROM Teams WHERE name = ?"))
         {
-            preparedStatement.setString(1, String.valueOf(teamId));
+            preparedStatement.setString(1, String.valueOf(teamName));
             ResultSet resultSet = preparedStatement.executeQuery();
             membersList = new ArrayList<>(Arrays.asList(resultSet.getString("members").split(",")));
 
@@ -133,10 +108,10 @@ public class TeamDatabase
                 membersList.remove(member);
             }
 
-            try(PreparedStatement preparedStatement2 = dataBaseContext.con.prepareStatement("UPDATE Teams SET members = ? WHERE id = ?"))
+            try(PreparedStatement preparedStatement2 = dataBaseContext.con.prepareStatement("UPDATE Teams SET members = ? WHERE name = ?"))
             {
                 preparedStatement2.setString(1, String.join(",", membersList));
-                preparedStatement2.setString(2, String.valueOf(teamId));
+                preparedStatement2.setString(2, String.valueOf(teamName));
                 preparedStatement2.executeUpdate();
             }
             catch (Exception e)
@@ -150,11 +125,11 @@ public class TeamDatabase
         }
     }
 
-    public void deleteTeam(int TeamId)
+    public void deleteTeam(String teamName)
     {
-        try(PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("DELETE FROM Teams WHERE id = ?"))
+        try(PreparedStatement preparedStatement = dataBaseContext.con.prepareStatement("DELETE FROM Teams WHERE name = ?"))
         {
-            preparedStatement.setString(1, String.valueOf(TeamId));
+            preparedStatement.setString(1, String.valueOf(teamName));
             preparedStatement.executeUpdate();
         }
         catch (Exception e)
